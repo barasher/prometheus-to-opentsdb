@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 const (
-	queryConfDesc = "query description"
+	queryConfDesc          = "query description"
 	queryConfMetricNameKey = "MetricName"
-	queryConfQueryKey = "Query"
-	queryConfStepKey = "Step"
-	
-	exporterConfDesc = "exporter configuration"
+	queryConfQueryKey      = "Query"
+	queryConfStepKey       = "Step"
+
+	exporterConfDesc             = "exporter configuration"
 	exporterConfPrometheusUrlKey = "PrometheusUrl"
 )
 
@@ -23,7 +24,7 @@ func loadJson(f string, i interface{}) error {
 	}
 	defer r.Close()
 
-	if err := json.NewDecoder(r).Decode(i) ; err != nil {
+	if err := json.NewDecoder(r).Decode(i); err != nil {
 		return fmt.Errorf("error when opening file '%v': %v", f, err)
 	}
 
@@ -41,20 +42,22 @@ type QueryConf struct {
 	MetricName string
 	Query      string
 	Step       string
+	Start      time.Time
+	End        time.Time
 }
 
 func GetQueryConf(f string) (QueryConf, error) {
 	c := QueryConf{}
-	if err := loadJson(f, &c) ; err != nil {
+	if err := loadJson(f, &c); err != nil {
 		return c, err
 	}
-	if err := checkNotEmptyString(c.MetricName, queryConfMetricNameKey, queryConfDesc) ; err != nil {
+	if err := checkNotEmptyString(c.MetricName, queryConfMetricNameKey, queryConfDesc); err != nil {
 		return c, err
 	}
-	if err := checkNotEmptyString(c.Query, queryConfQueryKey, queryConfDesc) ; err != nil {
+	if err := checkNotEmptyString(c.Query, queryConfQueryKey, queryConfDesc); err != nil {
 		return c, err
 	}
-	if err := checkNotEmptyString(c.Step, queryConfStepKey, queryConfDesc) ; err != nil {
+	if err := checkNotEmptyString(c.Step, queryConfStepKey, queryConfDesc); err != nil {
 		return c, err
 	}
 	return c, nil
@@ -62,14 +65,14 @@ func GetQueryConf(f string) (QueryConf, error) {
 
 type ExporterConf struct {
 	PrometheusURL string
-} 
+}
 
 func GetExporterConf(f string) (ExporterConf, error) {
 	c := ExporterConf{}
-	if err := loadJson(f, &c) ; err != nil {
+	if err := loadJson(f, &c); err != nil {
 		return c, err
 	}
-	if err := checkNotEmptyString(c.PrometheusURL, exporterConfPrometheusUrlKey, exporterConfDesc) ; err != nil {
+	if err := checkNotEmptyString(c.PrometheusURL, exporterConfPrometheusUrlKey, exporterConfDesc); err != nil {
 		return c, err
 	}
 	return c, nil
