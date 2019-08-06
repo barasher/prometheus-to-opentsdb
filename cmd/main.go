@@ -2,15 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/barasher/prometheus-to-opentsdb/internal"
-	promC "github.com/prometheus/client_golang/api"
-	promHttpC "github.com/prometheus/client_golang/api/prometheus/v1"
-	promCommon "github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -81,82 +79,24 @@ func doMain(args []string) int {
 		return retConfFailure
 	}
 
-	api, err := getPrometheusClient(expConf)
+	prometheus, err := internal.NewPrometheus(expConf)
 	if err != nil {
 		logrus.Errorf("%v", err)
 		return retExecFailure
 	}
 
-	v, _, err := query(ctx, api, queryConf)
+	neutral, err := prometheus.Query(ctx, queryConf)
 	if err != nil {
 		logrus.Errorf("%v", err)
 		return retExecFailure
 	}
 
-	converted, err := convertResult(v, queryConf)
+	j, err := json.Marshal(neutral)
 	if err != nil {
-		logrus.Errorf("%v", err)
+		logrus.Errorf("Error while marshaling data: %v", err)
 		return retExecFailure
 	}
-	fmt.Printf("%v", converted)
+	fmt.Printf("%v", string(j))
 
 	return retOk
-}
-
-func getPrometheusClient(c internal.ExporterConf) (promHttpC.API, error) {
-	promConf := promC.Config{Address: c.PrometheusURL}
-	promClient, err := promC.NewClient(promConf)
-	if err != nil {
-		return nil, fmt.Errorf("error while initializing Prometheus http client API: %v", err)
-	}
-	return promHttpC.NewAPI(promClient), nil
-}
-
-func query(ctx context.Context, api promHttpC.API, c internal.QueryConf) (promCommon.Value, promC.Warnings, error) {
-	var err error
-	var step time.Duration
-	if step, err = time.ParseDuration(c.Step); err != nil {
-		return nil, nil, fmt.Errorf("error while parsing step (%v): %v", c.Step, err)
-	}
-	ra := promHttpC.Range{
-		Start: c.Start,
-		End:   c.End,
-		Step:  step,
-	}
-	return api.QueryRange(ctx, c.Query, ra)
-}
-
-func convertResult(v promCommon.Value, c internal.QueryConf) ([]internal.OpenTsdbMetric, error) {
-	if v.Type() == promCommon.ValMatrix {
-		return convertMatrix(v.(promCommon.Matrix), c)
-	}
-	return []internal.OpenTsdbMetric{}, fmt.Errorf("Unsupported prometheus result type: %v", v.Type())
-}
-
-func convertMatrix(m promCommon.Matrix, c internal.QueryConf) ([]internal.OpenTsdbMetric, error) {
-	i := 0
-	for _, curCat := range m {
-		i += len(curCat.Values)
-	}
-	out := make([]internal.OpenTsdbMetric, i, i)
-	logrus.Debugf("%v measures from Prometheus", i)
-
-	i = 0
-	for _, curCat := range m {
-		tags := map[string]string{}
-		for curTagKey, curTagVal := range curCat.Metric {
-			tags[string(curTagKey)] = string(curTagVal)
-		}
-		for _, pt := range curCat.Values {
-			outCur := internal.OpenTsdbMetric{}
-			outCur.Timestamp = uint64(pt.Timestamp)
-			outCur.Value = float32(pt.Value)
-			outCur.Tags = tags
-			outCur.Metric = c.MetricName
-			out[i] = outCur
-			i++
-		}
-	}
-
-	return out, nil
 }
