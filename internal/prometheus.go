@@ -16,7 +16,7 @@ type Prometheus struct {
 	api promHttpC.API
 }
 
-// NewPrometheus instanciates a Prometheus connector 
+// NewPrometheus instanciates a Prometheus connector
 func NewPrometheus(c ExporterConf) (Prometheus, error) {
 	p := Prometheus{}
 	promConf := promC.Config{Address: c.PrometheusURL}
@@ -90,7 +90,7 @@ func (p Prometheus) convertMatrix(m promCommon.Matrix, c QueryConf) ([]OpentsdbM
 func (p Prometheus) normalize(s string) string {
 	b := []byte(s)
 	for i, c := range b {
-		if ! ( (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || ( c >= 'A' && c <= 'Z') ) {
+		if !((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z')) {
 			b[i] = '_'
 		}
 	}

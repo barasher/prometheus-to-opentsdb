@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDoMainConfigurationFailure(t *testing.T) {
@@ -41,7 +41,6 @@ func TestDoMainConfigurationFailure(t *testing.T) {
 			"-f", "2019-07-31T17:00:00.000Z",
 			"-t", "2019-07-31T17:03:00.000Z",
 		}},
-
 	}
 	for _, tc := range tcs {
 		t.Run(tc.tcID, func(t *testing.T) {
@@ -53,8 +52,8 @@ func TestDoMainConfigurationFailure(t *testing.T) {
 func TestSetLoggingLevel(t *testing.T) {
 	l := logrus.GetLevel()
 	var tcs = []struct {
-		tcID     string
-		inLvl string
+		tcID   string
+		inLvl  string
 		outLvl logrus.Level
 	}{
 		{"debug", "debug", logrus.DebugLevel},

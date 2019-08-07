@@ -1,19 +1,19 @@
 package internal
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
 	"net/http/httptest"
-	"io"
+	"testing"
 )
 
 func TestPush(t *testing.T) {
 	var tcs = []struct {
-		tcID     string
-		inStatus int
+		tcID       string
+		inStatus   int
 		inResponse string
-		expOK bool
+		expOK      bool
 	}{
 		{"nominal", http.StatusOK, "{ \"failed\":0, \"success\":2 }", true},
 		{"errorParsable", http.StatusBadRequest, "{ \"failed\":1, \"success\":0 }", false},
@@ -26,26 +26,25 @@ func TestPush(t *testing.T) {
 				io.WriteString(w, tc.inResponse)
 			}))
 			defer ts.Close()
-		
+
 			c := ExporterConf{OpentsdbURL: ts.URL}
 			o, err := NewOpentsdb(c)
 			assert.Nil(t, err)
-		
+
 			m := []OpentsdbMetric{
 				OpentsdbMetric{
-					Metric: "blabla",
+					Metric:    "blabla",
 					Timestamp: 42,
-					Value: 1.3,
-					Tags: map[string]string {
-						"k1":"v1",
-						"k2":"v2",
+					Value:     1.3,
+					Tags: map[string]string{
+						"k1": "v1",
+						"k2": "v2",
 					},
 				},
 			}
-		
+
 			err = o.Push(m)
-			assert.Equal(t, tc.expOK, err==nil)
+			assert.Equal(t, tc.expOK, err == nil)
 		})
 	}
 }
-

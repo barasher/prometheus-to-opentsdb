@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
-	"time"
-	"strings"
 	"fmt"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/barasher/prometheus-to-opentsdb/internal"
 	"github.com/sirupsen/logrus"
@@ -123,7 +123,7 @@ func doMain(args []string) int {
 		logrus.Errorf("error while creating opentsdb connector: %v", err)
 		return retExecFailure
 	}
-	if err := opentsdb.Push(neutral) ; err != nil {
+	if err := opentsdb.Push(neutral); err != nil {
 		logrus.Errorf("%v", err)
 		return retExecFailure
 	}

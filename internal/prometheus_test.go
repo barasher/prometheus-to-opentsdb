@@ -146,15 +146,15 @@ func TestQueryNominal(t *testing.T) {
 	end := start.AddDate(1, 1, 1)
 	conf := QueryConf{
 		MetricName: "blabla",
-		Step:  "10m",
-		Query: "myQuery",
-		Start: start,
-		End:   end,
+		Step:       "10m",
+		Query:      "myQuery",
+		Start:      start,
+		End:        end,
 	}
 	api := NewPromApiMock()
 	m := getReferenceMatrix()
-	api.SetQueryRangeOutput(m, nil, nil)	
-	
+	api.SetQueryRangeOutput(m, nil, nil)
+
 	o, err := Prometheus{api: api}.Query(ctx, conf)
 	assert.Nil(t, err)
 	assert.Len(t, o, 2)
@@ -169,14 +169,14 @@ func TestQueryErrorOnQuerying(t *testing.T) {
 	end := start.AddDate(1, 1, 1)
 	conf := QueryConf{
 		MetricName: "blabla",
-		Step:  "10m",
-		Query: "myQuery",
-		Start: start,
-		End:   end,
+		Step:       "10m",
+		Query:      "myQuery",
+		Start:      start,
+		End:        end,
 	}
 	api := NewPromApiMock()
-	api.SetQueryRangeOutput(nil, nil, fmt.Errorf("a"))	
-	
+	api.SetQueryRangeOutput(nil, nil, fmt.Errorf("a"))
+
 	_, err := Prometheus{api: api}.Query(ctx, conf)
 	assert.NotNil(t, err)
 }
