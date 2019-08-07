@@ -1,5 +1,5 @@
 {
     "PrometheusURL":"prometheusurl",
     "OpentsdbURL":"opentsdburl",
-    "LoggingLevel":"info"
+    "LoggingLevel":"blabla"
 }

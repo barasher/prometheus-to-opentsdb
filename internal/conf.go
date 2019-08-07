@@ -44,13 +44,13 @@ type QueryConf struct {
 	// Output metric name
 	MetricName string
 	// Query to execute in Prometheus
-	Query      string
+	Query string
 	// Step of the query
-	Step       string
+	Step string
 	// Start time
-	Start      time.Time
+	Start time.Time
 	// End time
-	End        time.Time
+	End time.Time
 }
 
 // GetQueryConf loads a query configuration
@@ -68,6 +68,7 @@ func GetQueryConf(f string) (QueryConf, error) {
 	if err := checkNotEmptyString(c.Step, queryConfStepKey, queryConfDesc); err != nil {
 		return c, err
 	}
+
 	return c, nil
 }
 
@@ -75,6 +76,7 @@ func GetQueryConf(f string) (QueryConf, error) {
 type ExporterConf struct {
 	PrometheusURL string
 	OpentsdbURL   string
+	LoggingLevel  string
 }
 
 // GetExporterConf loads an exporter configuration

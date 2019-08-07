@@ -5,6 +5,8 @@ import (
 	"flag"
 	"os"
 	"time"
+	"strings"
+	"fmt"
 
 	"github.com/barasher/prometheus-to-opentsdb/internal"
 	"github.com/sirupsen/logrus"
@@ -24,6 +26,30 @@ const (
 )
 
 const dateFormat string = "2006-01-02T15:04:05.000Z"
+
+const defaultLoggingLevel string = "info"
+
+var loggingLevels = map[string]logrus.Level{
+	"debug": logrus.DebugLevel,
+	"info":  logrus.InfoLevel,
+	"warn":  logrus.WarnLevel,
+	"error": logrus.ErrorLevel,
+	"fatal": logrus.FatalLevel,
+	"panic": logrus.PanicLevel,
+}
+
+func setLoggingLevel(s string) error {
+	if s == "" {
+		logrus.SetLevel(logrus.InfoLevel)
+		return nil
+	}
+	lvl, found := loggingLevels[strings.ToLower(s)]
+	if !found {
+		return fmt.Errorf("Wrong logging level value (%v)", s)
+	}
+	logrus.SetLevel(lvl)
+	return nil
+}
 
 func main() {
 	os.Exit(doMain(os.Args[1:]))
@@ -48,16 +74,6 @@ func doMain(args []string) int {
 		return retConfFailure
 	}
 
-	if *queryConfParam == "" {
-		logrus.Errorf("no query description file provided (-%v)", queryConfParamKey)
-		return retConfFailure
-	}
-	queryConf, err := internal.GetQueryConf(*queryConfParam)
-	if err != nil {
-		logrus.Errorf("error while loading query description file '%v': %v", *queryConfParam, err)
-		return retConfFailure
-	}
-
 	if *exporterConfParam == "" {
 		logrus.Errorf("no exporter configuration file provided provided (-%v)", exporterConfParamKey)
 		return retConfFailure
@@ -65,6 +81,20 @@ func doMain(args []string) int {
 	expConf, err := internal.GetExporterConf(*exporterConfParam)
 	if err != nil {
 		logrus.Errorf("error while loading exporter configuration file '%v': %v", *exporterConfParam, err)
+		return retConfFailure
+	}
+	if setLoggingLevel(expConf.LoggingLevel) != nil {
+		logrus.Errorf("%v", err)
+		return retConfFailure
+	}
+
+	if *queryConfParam == "" {
+		logrus.Errorf("no query description file provided (-%v)", queryConfParamKey)
+		return retConfFailure
+	}
+	queryConf, err := internal.GetQueryConf(*queryConfParam)
+	if err != nil {
+		logrus.Errorf("error while loading query description file '%v': %v", *queryConfParam, err)
 		return retConfFailure
 	}
 
