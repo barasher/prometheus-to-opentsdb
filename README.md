@@ -196,4 +196,4 @@ opentsdb body :
 
 wget --post-data '[{"metric":"blabla","timestamp":1564592490,"value":2,"tags":{"name":"prometheushttprequeststotal","code":"200","handler":"apiv1labelnamevalues","instance":"localhost9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592520,"value":2,"tags":{"name":"prometheushttprequeststotal","code":"200","handler":"apiv1labelnamevalues","instance":"localhost9090","job":"prometheus"}}]' --header="Content-Type:application/json" http://127.0.0.1:4242/api/put
 
-curl -v --data-binary @/tmp/b.json http://127.0.0.1:4242/api/put
+curl -v --data-binary @/tmp/c.json 'http://127.0.0.1:4242/api/put?summary&details'

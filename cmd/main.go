@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
-	"fmt"
 	"os"
 	"time"
 
@@ -81,22 +79,24 @@ func doMain(args []string) int {
 
 	prometheus, err := internal.NewPrometheus(expConf)
 	if err != nil {
-		logrus.Errorf("%v", err)
+		logrus.Errorf("error while creating prometheus connector: %v", err)
 		return retExecFailure
 	}
-
 	neutral, err := prometheus.Query(ctx, queryConf)
 	if err != nil {
 		logrus.Errorf("%v", err)
 		return retExecFailure
 	}
 
-	j, err := json.Marshal(neutral)
+	opentsdb, err := internal.NewOpentsdb(expConf)
 	if err != nil {
-		logrus.Errorf("Error while marshaling data: %v", err)
+		logrus.Errorf("error while creating opentsdb connector: %v", err)
 		return retExecFailure
 	}
-	fmt.Printf("%v", string(j))
+	if err := opentsdb.Push(neutral) ; err != nil {
+		logrus.Errorf("%v", err)
+		return retExecFailure
+	}
 
 	return retOk
 }

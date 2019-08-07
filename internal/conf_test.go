@@ -51,7 +51,13 @@ func TestGetExporterConf(t *testing.T) {
 		{"nonExistingFile", "nonExisting.json", false, defExporterConf},
 		{"unparsable", "../testdata/unparsable.json", false, defExporterConf},
 		{"noPrometheusUrl", "../testdata/confFiles/exporterConf_noPrometheusUrl.json", false, defExporterConf},
-		{"nominal", "../testdata/confFiles/exporterConf_nominal.json", true, ExporterConf{"prometheusurl"}},
+		{"noOpentsdbUrl", "../testdata/confFiles/exporterConf_noOpentsdbUrl.json", false, defExporterConf},
+		{"nominal", "../testdata/confFiles/exporterConf_nominal.json", true,
+			ExporterConf{
+				PrometheusURL: "prometheusurl",
+				OpentsdbURL:   "opentsdburl",
+			},
+		},
 	}
 	for _, tc := range tcs {
 		t.Run(tc.tcID, func(t *testing.T) {
@@ -59,6 +65,7 @@ func TestGetExporterConf(t *testing.T) {
 			if tc.expOk {
 				assert.Nil(t, err)
 				assert.Equal(t, tc.expExporterConf.PrometheusURL, c.PrometheusURL)
+				assert.Equal(t, tc.expExporterConf.OpentsdbURL, c.OpentsdbURL)
 			} else {
 				assert.NotNil(t, err)
 			}

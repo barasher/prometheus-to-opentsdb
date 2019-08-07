@@ -52,7 +52,7 @@ func getReferenceMatrix() promCommon.Matrix {
 	)
 }
 
-func checkOutputMetric(t *testing.T, m OpenTsdbMetric, n string, ts uint64, v float32, ta map[string]string) {
+func checkOutputMetric(t *testing.T, m OpentsdbMetric, n string, ts uint64, v float32, ta map[string]string) {
 	assert.Equal(t, m.Metric, n)
 	assert.Equal(t, m.Timestamp, ts)
 	assert.Equal(t, m.Value, v)
@@ -87,7 +87,7 @@ func TestUnsupportedResult(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestQueryInputMapping(t *testing.T) {
+func TestDoQueryInputMapping(t *testing.T) {
 	ctx := context.Background()
 	start := time.Now()
 	end := start.AddDate(1, 1, 1)
@@ -109,7 +109,7 @@ func TestQueryInputMapping(t *testing.T) {
 	Prometheus{api: api}.doQuery(ctx, conf)
 }
 
-func TestQueryError(t *testing.T) {
+func TestDoQueryError(t *testing.T) {
 	api := NewPromApiMock()
 	api.SetQueryRangeOutput(nil, nil, fmt.Errorf("a"))
 	ctx := context.Background()
@@ -125,7 +125,7 @@ func TestQueryError(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestQueryStepParseError(t *testing.T) {
+func TestDoQueryStepParseError(t *testing.T) {
 	ctx := context.Background()
 	start := time.Now()
 	end := start.AddDate(1, 1, 1)
@@ -138,4 +138,51 @@ func TestQueryStepParseError(t *testing.T) {
 	api := NewPromApiMock()
 	_, _, err := Prometheus{api: api}.doQuery(ctx, conf)
 	assert.NotNil(t, err)
+}
+
+func TestQueryNominal(t *testing.T) {
+	ctx := context.Background()
+	start := time.Now()
+	end := start.AddDate(1, 1, 1)
+	conf := QueryConf{
+		MetricName: "blabla",
+		Step:  "10m",
+		Query: "myQuery",
+		Start: start,
+		End:   end,
+	}
+	api := NewPromApiMock()
+	m := getReferenceMatrix()
+	api.SetQueryRangeOutput(m, nil, nil)	
+	
+	o, err := Prometheus{api: api}.Query(ctx, conf)
+	assert.Nil(t, err)
+	assert.Len(t, o, 2)
+	expTags := map[string]string{"k1": "v1", "k2": "v2"}
+	checkOutputMetric(t, o[0], "blabla", 1346846400, 1.2, expTags)
+	checkOutputMetric(t, o[1], "blabla", 1346846401, 2.4, expTags)
+}
+
+func TestQueryErrorOnQuerying(t *testing.T) {
+	ctx := context.Background()
+	start := time.Now()
+	end := start.AddDate(1, 1, 1)
+	conf := QueryConf{
+		MetricName: "blabla",
+		Step:  "10m",
+		Query: "myQuery",
+		Start: start,
+		End:   end,
+	}
+	api := NewPromApiMock()
+	api.SetQueryRangeOutput(nil, nil, fmt.Errorf("a"))	
+	
+	_, err := Prometheus{api: api}.Query(ctx, conf)
+	assert.NotNil(t, err)
+}
+
+func TestNormalize(t *testing.T) {
+	s := "1234567890)=azertyuiop^$qsdfghjklm*	<wxcvbn,;:!"
+	r := Prometheus{}.normalize(s)
+	assert.Equal(t, "1234567890__azertyuiop__qsdfghjklm___wxcvbn____", r)
 }

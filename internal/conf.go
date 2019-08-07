@@ -15,6 +15,7 @@ const (
 
 	exporterConfDesc             = "exporter configuration"
 	exporterConfPrometheusUrlKey = "PrometheusUrl"
+	exporterConfOpentsdbUrlKey   = "OpentsdbUrl"
 )
 
 func loadJson(f string, i interface{}) error {
@@ -38,14 +39,21 @@ func checkNotEmptyString(value string, fieldDesc string, structDesc string) erro
 	return nil
 }
 
+// QueryConf modelize a query configuration
 type QueryConf struct {
+	// Output metric name
 	MetricName string
+	// Query to execute in Prometheus
 	Query      string
+	// Step of the query
 	Step       string
+	// Start time
 	Start      time.Time
+	// End time
 	End        time.Time
 }
 
+// GetQueryConf loads a query configuration
 func GetQueryConf(f string) (QueryConf, error) {
 	c := QueryConf{}
 	if err := loadJson(f, &c); err != nil {
@@ -63,16 +71,22 @@ func GetQueryConf(f string) (QueryConf, error) {
 	return c, nil
 }
 
+// ExporterConf modelize an exporter configuration
 type ExporterConf struct {
 	PrometheusURL string
+	OpentsdbURL   string
 }
 
+// GetExporterConf loads an exporter configuration
 func GetExporterConf(f string) (ExporterConf, error) {
 	c := ExporterConf{}
 	if err := loadJson(f, &c); err != nil {
 		return c, err
 	}
 	if err := checkNotEmptyString(c.PrometheusURL, exporterConfPrometheusUrlKey, exporterConfDesc); err != nil {
+		return c, err
+	}
+	if err := checkNotEmptyString(c.OpentsdbURL, exporterConfOpentsdbUrlKey, exporterConfDesc); err != nil {
 		return c, err
 	}
 	return c, nil
