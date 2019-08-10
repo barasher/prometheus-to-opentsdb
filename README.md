@@ -1,199 +1,84 @@
 # prometheus-to-opentsdb
-Query Prometheus, dump results to OoenTSDB
 
-Sample query :
+## Description
 
-curl 'http://localhost:9090/api/v1/query_range?query=prometheus_http_requests_total%7Bcode!%3D%22302%22%7D&start=2019-07-31T17:00:00.000Z&end=2019-07-31T17:03:00.000Z&step=30s' | jq
-prometheus_http_requests_total{code!="302"}
+**Prometheus-to-Opentsdb** is a tool that executes queries on [Prometheus](https://prometheus.io/) and stores results to [Opentsdb](http://opentsdb.net/).
 
+It is not a remote storage, the typical use-case is metrology.
+
+Here is an example : let's consider a big Kubernetes cluster with a lots of pod running on it. A lots a metrics will be generated, usually consumed by Prometheus. Prometheus is not really designed to store metrics over time, it is rather used to deal with daily supervision. Only a subset of these metrics (eventually downsampled) are relevent to draw trends : here comes **Prometheus-to-Opentsdb**.
+
+It executes use-defined queries on Prometheus and stores the results on a long term time-series storage system : Opentsdb.
+
+## Usage
+
+### Configuration
+
+**Prometheus-to-Opentsdb**'s configuration is divided into three parts.
+
+The first part, the __exporter configuration file__ defines the "where": where are the backends ?
+
+```
 {
-  "status": "success",
-  "data": {
-    "resultType": "matrix",
-    "result": [
-      {
-        "metric": {
-          "__name__": "prometheus_http_requests_total",
-          "code": "200",
-          "handler": "/api/v1/label/:name/values",
-          "instance": "localhost:9090",
-          "job": "prometheus"
-        },
-        "values": [
-          [
-            1564592490,
-            "2"
-          ],
-          [
-            1564592520,
-            "2"
-          ],
-          [
-            1564592550,
-            "3"
-          ],
-          [
-            1564592580,
-            "3"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "__name__": "prometheus_http_requests_total",
-          "code": "200",
-          "handler": "/api/v1/query",
-          "instance": "localhost:9090",
-          "job": "prometheus"
-        },
-        "values": [
-          [
-            1564592490,
-            "2"
-          ],
-          [
-            1564592520,
-            "5"
-          ],
-          [
-            1564592550,
-            "9"
-          ],
-          [
-            1564592580,
-            "10"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "__name__": "prometheus_http_requests_total",
-          "code": "200",
-          "handler": "/api/v1/query_range",
-          "instance": "localhost:9090",
-          "job": "prometheus"
-        },
-        "values": [
-          [
-            1564592550,
-            "1"
-          ],
-          [
-            1564592580,
-            "1"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "__name__": "prometheus_http_requests_total",
-          "code": "200",
-          "handler": "/graph",
-          "instance": "localhost:9090",
-          "job": "prometheus"
-        },
-        "values": [
-          [
-            1564592490,
-            "2"
-          ],
-          [
-            1564592520,
-            "2"
-          ],
-          [
-            1564592550,
-            "2"
-          ],
-          [
-            1564592580,
-            "2"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "__name__": "prometheus_http_requests_total",
-          "code": "200",
-          "handler": "/metrics",
-          "instance": "localhost:9090",
-          "job": "prometheus"
-        },
-        "values": [
-          [
-            1564592490,
-            "2"
-          ],
-          [
-            1564592520,
-            "4"
-          ],
-          [
-            1564592550,
-            "6"
-          ],
-          [
-            1564592580,
-            "8"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "__name__": "prometheus_http_requests_total",
-          "code": "200",
-          "handler": "/static/*filepath",
-          "instance": "localhost:9090",
-          "job": "prometheus"
-        },
-        "values": [
-          [
-            1564592490,
-            "25"
-          ],
-          [
-            1564592520,
-            "25"
-          ],
-          [
-            1564592550,
-            "25"
-          ],
-          [
-            1564592580,
-            "25"
-          ]
-        ]
-      }
-    ]
-  }
+  "PrometheusURL":"http://127.0.0.1:9090",
+  "OpentsdbURL":"http://127.0.0.1:4242",
+  "LoggingLevel":"debug"
 }
+```
 
-opentsdb body :
-[
-    {
-        "metric": "sys.cpu.nice",
-        "timestamp": 1346846400,
-        "value": 18,
-        "tags": {
-           "host": "web01",
-           "dc": "lga"
-        }
-    },
-    {
-        "metric": "sys.cpu.nice",
-        "timestamp": 1346846400,
-        "value": 9,
-        "tags": {
-           "host": "web02",
-           "dc": "lga"
-        }
-    }
-]
+- __**PrometheusURL**__ defines the Prometheus URL - required
+- __**OpentsdbURL**__ defines the Opentsdb URL - required
+- __**LoggingLevel**__ defines the logging level (possible values: debug, info, warn, error, fatal, panic) - default value : info
 
-[{"metric":"blabla","timestamp":1564592490,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/label/:name/values","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592520,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/label/:name/values","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592550,"value":3,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/label/:name/values","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592580,"value":3,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/label/:name/values","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592490,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/query","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592520,"value":5,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/query","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592550,"value":9,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/query","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592580,"value":10,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/query","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592550,"value":1,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/query_range","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592580,"value":1,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/api/v1/query_range","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592490,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/graph","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592520,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/graph","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592550,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/graph","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592580,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/graph","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592490,"value":2,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/metrics","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592520,"value":4,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/metrics","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592550,"value":6,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/metrics","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592580,"value":8,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/metrics","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592490,"value":25,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/static/*filepath","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592520,"value":25,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/static/*filepath","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592550,"value":25,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/static/*filepath","instance":"localhost:9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592580,"value":25,"tags":{"__name__":"prometheus_http_requests_total","code":"200","handler":"/static/*filepath","instance":"localhost:9090","job":"prometheus"}}]
+The second part, the __query description file__ defines the "what": what's my query and how do I map the results ?
 
+```
+{
+    "MetricName":"blabla",
+    "Query":"prometheus_http_requests_total{code!=\"302\"}",
+    "Step":"30s"
+}
+```
 
-wget --post-data '[{"metric":"blabla","timestamp":1564592490,"value":2,"tags":{"name":"prometheushttprequeststotal","code":"200","handler":"apiv1labelnamevalues","instance":"localhost9090","job":"prometheus"}},{"metric":"blabla","timestamp":1564592520,"value":2,"tags":{"name":"prometheushttprequeststotal","code":"200","handler":"apiv1labelnamevalues","instance":"localhost9090","job":"prometheus"}}]' --header="Content-Type:application/json" http://127.0.0.1:4242/api/put
+- __**MetricName**__ defines the metric name for the gathered data - required
+- __**Query**__ defines the Prometheus query that has to be executed - required
+- __**Step**__  defines the step for the Prometheus query - required
 
-curl -v --data-binary @/tmp/c.json 'http://127.0.0.1:4242/api/put?summary&details'
+The third part defines the __date range__ for an execution : the "when". It is provided as command line arguments. The date format (UTC) is the following `YYYY-MM-DDThh:mm:ss.lllZ` where `YYYY` is the year, `MM` the month, `DD` the day, `hh` the hour, `mm` the minutes, `ss` the seconds and `lll` the milliseconds. Sample : `2019-07-31T17:03:00.000Z`.
+
+The goal of such a configuration mechanism is :
+- to define only one time the "where". You'll probably generate more than one metric from Prometheus : this configuration file will be reused.
+- to define only one time each metric definition ("what"), it will certainly be executed more than one time so this configuration file will also be reused
+- an execution combines an existing "where", an existing "what" and defines the date range.
+
+### Execution
+
+```
+Usage of Exporter:
+  -e string
+    	Exporter configuration file (where ?)
+  -q string
+    	Query description file (what ?)
+  -f string
+    	From / start date (when ?)
+  -t string
+    	To / end date (when ?)
+```
+
+Sample:
+- `./main -q ~/conf/query.json  -e ~/conf/exporter.conf -f 2019-07-23T00:00:00.000Z -t 2019-07-23T23:59:59.999Z` 
+
+Return codes:
+- **0**: everything was fine
+- **1**: configuration problem
+- **2**: execution problem
+
+## Docker
+
+## Metrics mapping
+
+Metrics, tag names and tag values are normalized to fit Opentsdb constraints. Any character that is not `[a-z]`, `[A-Z]`, `[0-9]` or `_` is replaced by `_`.
+
+## Changelog
+
+- **v1.0** : first (working) version
