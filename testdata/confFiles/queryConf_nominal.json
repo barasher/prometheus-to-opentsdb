@@ -1,5 +1,14 @@
 {
     "MetricName":"metricname",
     "Query":"query",
-    "Step":"step"
+    "Step":"step",
+    "AddTags": {
+        "addTagsKey1":"addTagVal1",
+        "addTagsKey2":"addTagVal2"
+    },
+    "RemoveTags": ["removeTagsKey1", "removeTagsKey2"],
+    "RenameTags": {
+        "renameTagsKey1":"renameTagsVal1",
+        "renameTagsKey2":"renameTagsVal2"
+    }
 }

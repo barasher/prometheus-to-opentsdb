@@ -186,3 +186,25 @@ func TestNormalize(t *testing.T) {
 	r := Prometheus{}.normalize(s)
 	assert.Equal(t, "1234567890__azertyuiop__qsdfghjklm___wxcvbn____", r)
 }
+
+func TestConvertTag(t *testing.T) {
+	m := promCommon.Metric(
+		map[promCommon.LabelName]promCommon.LabelValue{
+			"a": "f",
+			"g": "h",
+			"b": "i",
+		},
+	)
+	conf := QueryConf{
+		RemoveTags: []string{"a"},
+		RenameTags: map[string]string{"b": "c"},
+		AddTags:    map[string]string{"d": "e"},
+	}
+	tags := Prometheus{}.convertTags(m, conf)
+	expTags := map[string]string{
+		"g": "h",
+		"c": "i",
+		"d": "e",
+	}
+	assert.Equal(t, expTags, tags)
+}

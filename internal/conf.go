@@ -51,6 +51,12 @@ type QueryConf struct {
 	Start time.Time
 	// End time
 	End time.Time
+	// Tags to add
+	AddTags map[string]string
+	// Tags to remove
+	RemoveTags []string
+	// Tags to rename
+	RenameTags map[string]string
 }
 
 // GetQueryConf loads a query configuration
