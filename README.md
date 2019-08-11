@@ -8,7 +8,7 @@ It is not a remote storage, the typical use-case is metrology.
 
 Here is an example : let's consider a big Kubernetes cluster with a lots of pod running on it. A lots a metrics will be generated, usually consumed by Prometheus. Prometheus is not really designed to store metrics over time, it is rather used to deal with daily supervision. Only a subset of these metrics (eventually downsampled) are relevent to draw trends : here comes **Prometheus-to-Opentsdb**.
 
-It executes use-defined queries on Prometheus and stores the results on a long term time-series storage system : Opentsdb.
+It executes use-defined queries on Prometheus, binds data tags and stores the results on a long term time-series storage system : Opentsdb.
 
 ## Usage
 
@@ -20,9 +20,9 @@ The **first part**, the __exporter configuration file__ defines the "where": whe
 
 ```
 {
-  "PrometheusURL":"http://127.0.0.1:9090",
-  "OpentsdbURL":"http://127.0.0.1:4242",
-  "LoggingLevel":"debug"
+  "PrometheusURL" : "http://127.0.0.1:9090",
+  "OpentsdbURL" : "http://127.0.0.1:4242",
+  "LoggingLevel" : "debug"
 }
 ```
 
@@ -34,15 +34,26 @@ The **second part**, the __query description file__ defines the "what": what's m
 
 ```
 {
-    "MetricName":"blabla",
-    "Query":"prometheus_http_requests_total{code!=\"302\"}",
-    "Step":"30s"
+    "MetricName" : "myMetric",
+    "Query" : "prometheus_http_requests_total{code!=\"302\"}",
+    "Step" : "30s",
+    "AddTags" : {
+      "aTagNameIWantToAdd" : "aTagValueIWantToAdd"
+    },
+    "RemoveTags" : [ "aTagNameIDoNotWantToKeepFromPrometheus" ],
+    "RenameTags" : {
+      "aTagNameIWantToRename" : "aNewTagName"
+    }
 }
 ```
 
 - __**MetricName**__ defines the metric name for the gathered data - required
 - __**Query**__ defines the Prometheus query that has to be executed - required
 - __**Step**__  defines the step for the Prometheus query - required
+- Tags are automatically mapped from Prometheus to Opentsdb but it can be tuned :
+  - __**AddTags**__  defines the tags that have to be added to the metrics
+  - __**RemoveTags**__ defines the tag names that have to be removed for the metrics
+  - __**RenameTags**__ defines the tag names that have to be renamed
 
 The **third part** defines all the parameters (command line) relative to a specific execution :
 - `-f` and `-t` (both required) defines the date range for the execution. The date format (UTC) is the following `YYYY-MM-DDThh:mm:ss.lllZ` where `YYYY` is the year, `MM` the month, `DD` the day, `hh` the hour, `mm` the minutes, `ss` the seconds and `lll` the milliseconds. Sample : `2019-07-31T17:03:00.000Z`.

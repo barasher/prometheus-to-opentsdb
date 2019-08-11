@@ -21,7 +21,14 @@ func TestGetQueryConf(t *testing.T) {
 		{"noQuery", "../testdata/confFiles/queryConf_noQuery.json", false, defQueryConf},
 		{"noStep", "../testdata/confFiles/queryConf_noStep.json", false, defQueryConf},
 		{"nominal", "../testdata/confFiles/queryConf_nominal.json", true,
-			QueryConf{MetricName: "metricname", Query: "query", Step: "step"},
+			QueryConf{
+				MetricName: "metricname",
+				Query:      "query",
+				Step:       "step",
+				AddTags:    map[string]string{"addTagsKey1": "addTagVal1", "addTagsKey2": "addTagVal2"},
+				RemoveTags: []string{"removeTagsKey1", "removeTagsKey2"},
+				RenameTags: map[string]string{"renameTagsKey1": "renameTagsVal1", "renameTagsKey2": "renameTagsVal2"},
+			},
 		},
 	}
 	for _, tc := range tcs {
@@ -32,6 +39,9 @@ func TestGetQueryConf(t *testing.T) {
 				assert.Equal(t, tc.expQueryConf.MetricName, c.MetricName)
 				assert.Equal(t, tc.expQueryConf.Query, c.Query)
 				assert.Equal(t, tc.expQueryConf.Step, c.Step)
+				assert.Equal(t, tc.expQueryConf.AddTags, c.AddTags)
+				assert.Equal(t, tc.expQueryConf.RemoveTags, c.RemoveTags)
+				assert.Equal(t, tc.expQueryConf.RenameTags, c.RenameTags)
 			} else {
 				assert.NotNil(t, err)
 			}

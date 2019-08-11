@@ -61,19 +61,16 @@ func (p Prometheus) convertResult(v promCommon.Value, c QueryConf) ([]OpentsdbMe
 
 func (p Prometheus) convertMatrix(m promCommon.Matrix, c QueryConf) ([]OpentsdbMetric, error) {
 	i := 0
-	for _, curCat := range m {
-		i += len(curCat.Values)
+	for _, curSS := range m {
+		i += len(curSS.Values)
 	}
 	out := make([]OpentsdbMetric, i, i)
 	logrus.Debugf("%v measures from Prometheus", i)
 
 	i = 0
-	for _, curCat := range m {
-		tags := map[string]string{}
-		for curTagKey, curTagVal := range curCat.Metric {
-			tags[p.normalize(string(curTagKey))] = p.normalize(string(curTagVal))
-		}
-		for _, pt := range curCat.Values {
+	for _, curSS := range m {
+		tags := p.convertTags(curSS.Metric, c)
+		for _, pt := range curSS.Values {
 			outCur := OpentsdbMetric{}
 			outCur.Timestamp = uint64(pt.Timestamp) / 1000
 			outCur.Value = float32(pt.Value)
@@ -85,6 +82,35 @@ func (p Prometheus) convertMatrix(m promCommon.Matrix, c QueryConf) ([]OpentsdbM
 	}
 
 	return out, nil
+}
+
+func (p Prometheus) keepTag(k string, c QueryConf) bool {
+	for _, curRem := range c.RemoveTags {
+		if curRem == k {
+			return false
+		}
+	}
+	return true
+}
+
+func (p Prometheus) convertTags(ss promCommon.Metric, c QueryConf) map[string]string {
+	tags := make(map[string]string)
+	for curTagKey, curTagVal := range ss {
+		sK := string(curTagKey)
+		sV := string(curTagVal)
+		if !p.keepTag(sK, c) { // remove
+			continue
+		}
+		if newK, found := c.RenameTags[sK]; found { // rename
+			tags[p.normalize(newK)] = p.normalize(sV)
+		} else { // keep unchanged
+			tags[p.normalize(sK)] = p.normalize(sV)
+		}
+	}
+	for cK, cV := range c.AddTags { // add
+		tags[p.normalize(cK)] = p.normalize(cV)
+	}
+	return tags
 }
 
 func (p Prometheus) normalize(s string) string {
