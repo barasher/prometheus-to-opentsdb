@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -23,6 +24,7 @@ const (
 	exporterConfParamKey string = "e"
 	fromParamKey         string = "f"
 	toParamKey           string = "t"
+	simuParamKey         string = "s"
 )
 
 const dateFormat string = "2006-01-02T15:04:05.000Z"
@@ -61,6 +63,7 @@ func doMain(args []string) int {
 	exporterConfParam := cmd.String(exporterConfParamKey, "", "Exporter configuration file")
 	fromParam := cmd.String(fromParamKey, "", "From / start date")
 	toParam := cmd.String(toParamKey, "", "To / end date")
+	simuParam := cmd.Bool(simuParamKey, false, "Simulation mode (don't push to Opentsdb)")
 
 	ctx := context.Background()
 
@@ -116,6 +119,16 @@ func doMain(args []string) int {
 	if err != nil {
 		logrus.Errorf("%v", err)
 		return retExecFailure
+	}
+
+	if *simuParam { // simulation mode
+		j, err := json.MarshalIndent(neutral, "", "\t")
+		if err != nil {
+			logrus.Errorf("error while printing results: %v", err)
+			return retExecFailure
+		}
+		fmt.Printf("%v\n", string(j))
+		return retOk
 	}
 
 	opentsdb, err := internal.NewOpentsdb(expConf)

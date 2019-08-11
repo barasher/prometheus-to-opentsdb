@@ -16,7 +16,7 @@ It executes use-defined queries on Prometheus and stores the results on a long t
 
 **Prometheus-to-Opentsdb**'s configuration is divided into three parts.
 
-The first part, the __exporter configuration file__ defines the "where": where are the backends ?
+The **first part**, the __exporter configuration file__ defines the "where": where are the backends ?
 
 ```
 {
@@ -30,7 +30,7 @@ The first part, the __exporter configuration file__ defines the "where": where a
 - __**OpentsdbURL**__ defines the Opentsdb URL - required
 - __**LoggingLevel**__ defines the logging level (possible values: debug, info, warn, error, fatal, panic) - default value : info
 
-The second part, the __query description file__ defines the "what": what's my query and how do I map the results ?
+The **second part**, the __query description file__ defines the "what": what's my query and how do I map the results ?
 
 ```
 {
@@ -44,9 +44,11 @@ The second part, the __query description file__ defines the "what": what's my qu
 - __**Query**__ defines the Prometheus query that has to be executed - required
 - __**Step**__  defines the step for the Prometheus query - required
 
-The third part defines the __date range__ for an execution : the "when". It is provided as command line arguments. The date format (UTC) is the following `YYYY-MM-DDThh:mm:ss.lllZ` where `YYYY` is the year, `MM` the month, `DD` the day, `hh` the hour, `mm` the minutes, `ss` the seconds and `lll` the milliseconds. Sample : `2019-07-31T17:03:00.000Z`.
+The **third part** defines all the parameters (command line) relative to a specific execution :
+- `-f` and `-t` (both required) defines the date range for the execution. The date format (UTC) is the following `YYYY-MM-DDThh:mm:ss.lllZ` where `YYYY` is the year, `MM` the month, `DD` the day, `hh` the hour, `mm` the minutes, `ss` the seconds and `lll` the milliseconds. Sample : `2019-07-31T17:03:00.000Z`.
+- `-s` activates the simulation mode : data will be gathered from Prometheus, mapped as it should be for Opentsdb but it will not be sent but only printed. By default, simulation mode is disabled.
 
-The goal of such a configuration mechanism is :
+But why such a configuration mechanism ? The objective is in fact :
 - to define only one time the "where". You'll probably generate more than one metric from Prometheus : this configuration file will be reused.
 - to define only one time each metric definition ("what"), it will certainly be executed more than one time so this configuration file will also be reused
 - an execution combines an existing "where", an existing "what" and defines the date range.
@@ -63,10 +65,12 @@ Usage of Exporter:
     	From / start date (when ?)
   -t string
     	To / end date (when ?)
+  -s	Simulation mode (don't push to Opentsdb)
 ```
 
 Sample:
-- `./main -q ~/conf/query.json  -e ~/conf/exporter.conf -f 2019-07-23T00:00:00.000Z -t 2019-07-23T23:59:59.999Z` 
+- `./main -q ~/conf/query.json  -e ~/conf/exporter.conf -f 2019-07-23T00:00:00.000Z -t 2019-07-23T23:59:59.999Z`  : effective execution
+- `./main -q ~/conf/query.json  -e ~/conf/exporter.conf -f 2019-07-23T00:00:00.000Z -t 2019-07-23T23:59:59.999Z -s` : simulation
 
 Return codes:
 - **0**: everything was fine
