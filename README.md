@@ -97,3 +97,6 @@ Metrics, tag names and tag values are normalized to fit Opentsdb constraints. An
 ## Changelog
 
 - **v1.0** : first (working) version
+- **[v1.1](https://github.com/barasher/prometheus-to-opentsdb/milestone/1?closed=1)** :
+  - add "simulation" mode (does not push to Opentsdb but print data on stdout)
+  - allow user to add, rename or remove tags
