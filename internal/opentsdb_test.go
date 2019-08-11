@@ -32,7 +32,7 @@ func TestPush(t *testing.T) {
 			assert.Nil(t, err)
 
 			m := []OpentsdbMetric{
-				OpentsdbMetric{
+				{
 					Metric:    "blabla",
 					Timestamp: 42,
 					Value:     1.3,
