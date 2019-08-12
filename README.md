@@ -1,4 +1,9 @@
-# prometheus-to-opentsdb
+# Prometheus to Opentsdb exporter
+
+[![Build Status](https://travis-ci.org/barasher/prometheus-to-opentsdb.svg?branch=master)](https://travis-ci.org/barasher/prometheus-to-opentsdb)
+[![go report card](https://goreportcard.com/badge/github.com/barasher/go-exiftool "go report card")](https://goreportcard.com/report/github.com/barasher/prometheus-to-opentsdb)
+[![GoDoc](https://godoc.org/github.com/barasher/prometheus-to-opentsdb?status.svg)](https://godoc.org/github.com/barasher/prometheus-to-opentsdb)
+[![Coverage Status](https://coveralls.io/repos/github/barasher/prometheus-to-opentsdb/badge.svg)](https://coveralls.io/github/barasher/prometheus-to-opentsdb)
 
 ## Description
 

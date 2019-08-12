@@ -8,3 +8,9 @@ before_install:
 
 script:
   - env GO111MODULE=on go test -v ./...
+  
+install:
+  - go get github.com/mattn/goveralls
+
+script:
+  - env GO111MODULE=on $GOPATH/bin/goveralls -service=travis-ci
