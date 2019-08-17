@@ -1,6 +1,6 @@
 package internal
 
-// Opentsdb describes a metric based on Opentsdb specifications
+// OpentsdbMetric describes a metric based on Opentsdb specifications
 type OpentsdbMetric struct {
 	// Metric is the metric name
 	Metric string `json:"metric"`

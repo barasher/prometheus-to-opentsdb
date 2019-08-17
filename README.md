@@ -147,3 +147,8 @@ Metrics, tag names and tag values are normalized to fit Opentsdb constraints. An
 - **[v1.1](https://github.com/barasher/prometheus-to-opentsdb/milestone/1?closed=1)** :
   - add "simulation" mode (does not push to Opentsdb but print data on stdout)
   - allow user to add, rename or remove tags
+- **[v1.2](https://github.com/barasher/prometheus-to-opentsdb/milestone/2?closed=1)** :
+  - add timeout when interacting with Opentsdb
+  - split data pushed to Opentsdb
+  - parallelize interaction with Opentsdb when pushing data
+  - docker image integration
