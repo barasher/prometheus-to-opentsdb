@@ -9,15 +9,17 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	opentsdbRestApiSuffix string = "/api/put?summary&details"
-	defaultBulkSize       uint   = 50
-	defaultThreadCount    uint   = 1
-	routierIdKey          string = "routineId"
+	opentsdbRestApiSuffix string        = "/api/put?summary&details"
+	defaultBulkSize       uint          = 50
+	defaultThreadCount    uint          = 1
+	defaultPushTimeout    time.Duration = time.Minute
+	routierIdKey          string        = "routineId"
 )
 
 // Opentsdb is an Opentsdb connector
@@ -25,6 +27,7 @@ type Opentsdb struct {
 	opentsdbURL string
 	bulkSize    uint
 	threadCount uint
+	pushTimeout time.Duration
 }
 
 type opentsbResponse struct {
@@ -46,6 +49,16 @@ func NewOpentsdb(c ExporterConf) (Opentsdb, error) {
 	if c.ThreadCount == 0 {
 		logrus.Infof("Default thread count will be used: %v", defaultThreadCount)
 		o.threadCount = defaultThreadCount
+	}
+	var err error
+	switch c.PushTimeout {
+	case "":
+		logrus.Infof("Default push timeout will be used: %v", defaultPushTimeout)
+		o.pushTimeout = defaultPushTimeout
+	default:
+		if o.pushTimeout, err = time.ParseDuration(c.PushTimeout); err != nil {
+			return o, fmt.Errorf("error while parsing push timeout duration (%v): %v", c.PushTimeout, err)
+		}
 	}
 	return o, nil
 }
@@ -106,7 +119,9 @@ func (o Opentsdb) doPush(ctx context.Context, m []OpentsdbMetric) error {
 	req, err := http.NewRequest(http.MethodPost, o.opentsdbURL, bytes.NewBuffer(data))
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: o.pushTimeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("pusher %v, error while pushing data: %v", ctx.Value(routierIdKey), err)

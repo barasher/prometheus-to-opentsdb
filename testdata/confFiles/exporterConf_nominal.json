@@ -3,5 +3,6 @@
     "OpentsdbURL":"opentsdburl",
     "LoggingLevel":"info",
     "BulkSize":50,
-    "ThreadCount":2
+    "ThreadCount":2,
+    "PushTimeout":"1s"
 }
