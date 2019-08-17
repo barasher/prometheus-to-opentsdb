@@ -97,6 +97,42 @@ Return codes:
 
 ## Docker
 
+### Get from docker hub
+
+### Build
+
+`docker build -t barasher/prometheus_to_opentsdb:latest .`
+
+### How to use
+
+Inside the container, configuration files are located :
+- `/etc/p2o/exporter.json` for the exporter configuration
+- `etc/p2o/query.json` for the query configuration
+The files can be injected as volume where executing the container.
+
+It also uses 2 environment variables :
+- `P2O_FROM` that defines the start date
+- `P2O_TO` that defines the end date
+
+Sample :
+```
+docker run \
+  -v /home/barasher/conf/exporter.conf:/etc/p2o/exporter.json \
+  -v /home/barasher/conf/query.json:/etc/p2o/query.json \
+  --env P2O_FROM='2019-08-11T13:00:00.000Z' \
+  --env P2O_TO='2019-08-11T13:32:00.000Z' \
+  --rm \
+  barasher/prometheus_to_opentsdb:latest
+```
+
+The idea is that :
+- you can provide to your clients a "base" Docker image that contains the exporter configuration.
+- your clients can build their own Docker image containing the query configuration if they want to (or they can just provide the configuration as volume at each execution)
+- your clients executes a Docker image (theirs or yours), specifying the date range for the query.
+ 
+
+
+
 ## Metrics mapping
 
 Metrics, tag names and tag values are normalized to fit Opentsdb constraints. Any character that is not `[a-z]`, `[A-Z]`, `[0-9]` or `_` is replaced by `_`.
