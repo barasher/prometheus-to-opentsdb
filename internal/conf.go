@@ -82,6 +82,7 @@ func GetQueryConf(f string) (QueryConf, error) {
 type ExporterConf struct {
 	PrometheusURL string
 	OpentsdbURL   string
+	BulkSize      uint
 	LoggingLevel  string
 }
 

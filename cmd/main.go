@@ -136,7 +136,7 @@ func doMain(args []string) int {
 		logrus.Errorf("error while creating opentsdb connector: %v", err)
 		return retExecFailure
 	}
-	if err := opentsdb.Push(neutral); err != nil {
+	if err := opentsdb.Push(ctx, neutral); err != nil {
 		logrus.Errorf("%v", err)
 		return retExecFailure
 	}
