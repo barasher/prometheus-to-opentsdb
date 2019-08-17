@@ -68,6 +68,7 @@ func TestGetExporterConf(t *testing.T) {
 				OpentsdbURL:   "opentsdburl",
 				LoggingLevel:  "info",
 				BulkSize:      50,
+				ThreadCount:   2,
 			},
 		},
 	}
@@ -80,6 +81,7 @@ func TestGetExporterConf(t *testing.T) {
 				assert.Equal(t, tc.expExporterConf.OpentsdbURL, c.OpentsdbURL)
 				assert.Equal(t, tc.expExporterConf.LoggingLevel, c.LoggingLevel)
 				assert.Equal(t, tc.expExporterConf.BulkSize, c.BulkSize)
+				assert.Equal(t, tc.expExporterConf.ThreadCount, c.ThreadCount)
 			} else {
 				assert.NotNil(t, err)
 			}
