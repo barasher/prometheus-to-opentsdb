@@ -1,5 +1,6 @@
 {
     "PrometheusURL":"prometheusurl",
     "OpentsdbURL":"opentsdburl",
-    "LoggingLevel":"info"
+    "LoggingLevel":"info",
+    "BulkSize":50
 }

@@ -66,6 +66,8 @@ func TestGetExporterConf(t *testing.T) {
 			ExporterConf{
 				PrometheusURL: "prometheusurl",
 				OpentsdbURL:   "opentsdburl",
+				LoggingLevel:  "info",
+				BulkSize:      50,
 			},
 		},
 	}
@@ -76,6 +78,8 @@ func TestGetExporterConf(t *testing.T) {
 				assert.Nil(t, err)
 				assert.Equal(t, tc.expExporterConf.PrometheusURL, c.PrometheusURL)
 				assert.Equal(t, tc.expExporterConf.OpentsdbURL, c.OpentsdbURL)
+				assert.Equal(t, tc.expExporterConf.LoggingLevel, c.LoggingLevel)
+				assert.Equal(t, tc.expExporterConf.BulkSize, c.BulkSize)
 			} else {
 				assert.NotNil(t, err)
 			}

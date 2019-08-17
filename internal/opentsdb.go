@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,10 +13,12 @@ import (
 )
 
 const opentsdbRestApiSuffix string = "/api/put?summary&details"
+const defaultBulkSize uint = 50
 
 // Opentsdb is an Opentsdb connector
 type Opentsdb struct {
 	opentsdbURL string
+	bulkSize    uint
 }
 
 type opentsbResponse struct {
@@ -25,12 +28,41 @@ type opentsbResponse struct {
 
 // NewOpentsdb instanciates an Opentsdb connector
 func NewOpentsdb(c ExporterConf) (Opentsdb, error) {
-	return Opentsdb{opentsdbURL: c.OpentsdbURL + opentsdbRestApiSuffix}, nil
+	o := Opentsdb{
+		opentsdbURL: c.OpentsdbURL + opentsdbRestApiSuffix,
+		bulkSize:    c.BulkSize,
+	}
+	if c.BulkSize == 0 {
+		logrus.Infof("Default bulksize will be used: %v", defaultBulkSize)
+		o.bulkSize = defaultBulkSize
+	}
+	return o, nil
 }
 
 // Push pushes metrics to Opentsdb
-func (o Opentsdb) Push(m []OpentsdbMetric) error {
-	// TODO : stream
+func (o Opentsdb) Push(ctx context.Context, m []OpentsdbMetric) error {
+	start, end := uint(0), uint(0)
+	length := uint(len(m))
+	errOccured := false
+	for end < length {
+		end += o.bulkSize
+		if end > length {
+			end = length
+		}
+		logrus.Debugf("Pushing values %v to %v (total: %v)", start+1, end, length)
+		if err := o.doPush(ctx, m[start:end]); err != nil {
+			errOccured = true
+			logrus.Errorf("error while pushing to Opentsdb: %v", err)
+		}
+		start = end
+	}
+	if errOccured {
+		return fmt.Errorf("Some errors occured while pushing to opentsdb")
+	}
+	return nil
+}
+
+func (o Opentsdb) doPush(ctx context.Context, m []OpentsdbMetric) error {
 	data, err := json.Marshal(m)
 	if err != nil {
 		return fmt.Errorf("error while marshaling data: %v", err)

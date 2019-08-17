@@ -27,13 +27,15 @@ The **first part**, the __exporter configuration file__ defines the "where": whe
 {
   "PrometheusURL" : "http://127.0.0.1:9090",
   "OpentsdbURL" : "http://127.0.0.1:4242",
-  "LoggingLevel" : "debug"
+  "LoggingLevel" : "debug",
+  "BulkSize" : 20
 }
 ```
 
 - __**PrometheusURL**__ defines the Prometheus URL - required
 - __**OpentsdbURL**__ defines the Opentsdb URL - required
 - __**LoggingLevel**__ defines the logging level (possible values: debug, info, warn, error, fatal, panic) - default value : info
+- __**BulkSize**__ defines the size of the bulk pushed to Opentsdb - default value : 50
 
 The **second part**, the __query description file__ defines the "what": what's my query and how do I map the results ?
 
