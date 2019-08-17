@@ -83,6 +83,7 @@ type ExporterConf struct {
 	PrometheusURL string
 	OpentsdbURL   string
 	BulkSize      uint
+	ThreadCount   uint
 	LoggingLevel  string
 }
 

@@ -36,6 +36,7 @@ The **first part**, the __exporter configuration file__ defines the "where": whe
 - __**OpentsdbURL**__ defines the Opentsdb URL - required
 - __**LoggingLevel**__ defines the logging level (possible values: debug, info, warn, error, fatal, panic) - default value : info
 - __**BulkSize**__ defines the size of the bulk pushed to Opentsdb - default value : 50
+- __**ThreadCount**__ defines how many goroutines will push data to Opentsdb
 
 The **second part**, the __query description file__ defines the "what": what's my query and how do I map the results ?
 

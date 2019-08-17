@@ -16,6 +16,7 @@ func TestNewOpentsdbDefaultValues(t *testing.T) {
 	o, err := NewOpentsdb(c)
 	assert.Nil(t, err)
 	assert.Equal(t, defaultBulkSize, o.bulkSize)
+	assert.Equal(t, defaultThreadCount, o.threadCount)
 }
 
 func TestDoPush(t *testing.T) {
@@ -135,13 +136,14 @@ func TestPushNominal(t *testing.T) {
 			c := ExporterConf{
 				OpentsdbURL: ts.URL,
 				BulkSize:    uint(tc.inBulkSize),
+				ThreadCount: uint(2),
 			}
 			o, err := NewOpentsdb(c)
 			assert.Nil(t, err)
 
 			err = o.Push(ctx, m)
 			assert.Nil(t, err)
-			assert.Equal(t, tc.expBulk, pushedMetricIds)
+			assert.ElementsMatch(t, tc.expBulk, pushedMetricIds)
 		})
 	}
 }

@@ -2,5 +2,6 @@
     "PrometheusURL":"prometheusurl",
     "OpentsdbURL":"opentsdburl",
     "LoggingLevel":"info",
-    "BulkSize":50
+    "BulkSize":50,
+    "ThreadCount":2
 }

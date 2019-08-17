@@ -8,17 +8,23 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
-const opentsdbRestApiSuffix string = "/api/put?summary&details"
-const defaultBulkSize uint = 50
+const (
+	opentsdbRestApiSuffix string = "/api/put?summary&details"
+	defaultBulkSize       uint   = 50
+	defaultThreadCount    uint   = 1
+	routierIdKey          string = "routineId"
+)
 
 // Opentsdb is an Opentsdb connector
 type Opentsdb struct {
 	opentsdbURL string
 	bulkSize    uint
+	threadCount uint
 }
 
 type opentsbResponse struct {
@@ -31,31 +37,61 @@ func NewOpentsdb(c ExporterConf) (Opentsdb, error) {
 	o := Opentsdb{
 		opentsdbURL: c.OpentsdbURL + opentsdbRestApiSuffix,
 		bulkSize:    c.BulkSize,
+		threadCount: c.ThreadCount,
 	}
 	if c.BulkSize == 0 {
-		logrus.Infof("Default bulksize will be used: %v", defaultBulkSize)
+		logrus.Infof("Default bulk size will be used: %v", defaultBulkSize)
 		o.bulkSize = defaultBulkSize
+	}
+	if c.ThreadCount == 0 {
+		logrus.Infof("Default thread count will be used: %v", defaultThreadCount)
+		o.threadCount = defaultThreadCount
 	}
 	return o, nil
 }
 
 // Push pushes metrics to Opentsdb
 func (o Opentsdb) Push(ctx context.Context, m []OpentsdbMetric) error {
+	logrus.SetLevel(logrus.DebugLevel)
+	tasks := make(chan []OpentsdbMetric, o.threadCount)
+	wg := sync.WaitGroup{}
+	wg.Add(int(o.threadCount))
+	errOccured := false
+
+	// consumer
+	for i := uint(0); i < o.threadCount; i++ {
+		thId := i
+		go func() {
+			thIdLocal := thId
+			subCtx := context.WithValue(ctx, routierIdKey, thIdLocal)
+			defer wg.Done()
+			for curTask := range tasks {
+				logrus.Debugf("pusher %v, curTask: %v", thIdLocal, curTask)
+				if err := o.doPush(subCtx, curTask); err != nil {
+					errOccured = true
+					logrus.Errorf("error while pushing to Opentsdb: %v", err)
+				}
+			}
+		}()
+	}
+
+	// provider
 	start, end := uint(0), uint(0)
 	length := uint(len(m))
-	errOccured := false
 	for end < length {
 		end += o.bulkSize
 		if end > length {
 			end = length
 		}
-		logrus.Debugf("Pushing values %v to %v (total: %v)", start+1, end, length)
-		if err := o.doPush(ctx, m[start:end]); err != nil {
-			errOccured = true
-			logrus.Errorf("error while pushing to Opentsdb: %v", err)
-		}
+		logrus.Debugf("new task, %v to %v, total: %v", start+1, end, length)
+		tasks <- m[start:end]
 		start = end
 	}
+	close(tasks)
+
+	wg.Wait()
+	logrus.Debugf("Push finished")
+
 	if errOccured {
 		return fmt.Errorf("Some errors occured while pushing to opentsdb")
 	}
@@ -65,7 +101,7 @@ func (o Opentsdb) Push(ctx context.Context, m []OpentsdbMetric) error {
 func (o Opentsdb) doPush(ctx context.Context, m []OpentsdbMetric) error {
 	data, err := json.Marshal(m)
 	if err != nil {
-		return fmt.Errorf("error while marshaling data: %v", err)
+		return fmt.Errorf("pusher %v, error while marshaling data: %v", ctx.Value(routierIdKey), err)
 	}
 	req, err := http.NewRequest(http.MethodPost, o.opentsdbURL, bytes.NewBuffer(data))
 	req.Header.Set("Content-Type", "application/json")
@@ -73,26 +109,27 @@ func (o Opentsdb) doPush(ctx context.Context, m []OpentsdbMetric) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error while pushing data: %v", err)
+		return fmt.Errorf("pusher %v, error while pushing data: %v", ctx.Value(routierIdKey), err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 {
+		logrus.Debugf("pusher %v, pushed %v points with success", ctx.Value(routierIdKey), len(m))
 		return nil
 	}
 
-	logrus.Warnf("Opentsdb HTTP status: %v", resp.Status)
+	logrus.Warnf("pusher %v, opentsdb HTTP status: %v", ctx.Value(routierIdKey), resp.Status)
 	respCont, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("error while reading response: %v", err)
+		return fmt.Errorf("pusher %v, error while reading response: %v", ctx.Value(routierIdKey), err)
 	}
 	fmt.Fprintf(os.Stderr, "%v", string(respCont))
 
 	oResp := opentsbResponse{}
 	err = json.Unmarshal(respCont, &oResp)
 	if err != nil {
-		return fmt.Errorf("error while parsing response: %v", err)
+		return fmt.Errorf("pusher %v, error while parsing response: %v", ctx.Value(routierIdKey), err)
 	}
-	logrus.Warnf("Opentsdb rejected metrics: %v", oResp.Failed)
-	return fmt.Errorf("Some metrics have been rejected (%v)", oResp.Failed)
+	logrus.Warnf("pusher %v, Opentsdb rejected metrics: %v", ctx.Value(routierIdKey), oResp.Failed)
+	return fmt.Errorf("pusher %v, some metrics have been rejected (%v)", ctx.Value(routierIdKey), oResp.Failed)
 }
