@@ -28,15 +28,18 @@ The **first part**, the __exporter configuration file__ defines the "where": whe
   "PrometheusURL" : "http://127.0.0.1:9090",
   "OpentsdbURL" : "http://127.0.0.1:4242",
   "LoggingLevel" : "debug",
-  "BulkSize" : 20
+  "BulkSize" : 20,
+  "TheadCount" : 2,
+  "PushTimeout" : "500ms"
 }
 ```
 
 - __**PrometheusURL**__ defines the Prometheus URL - required
 - __**OpentsdbURL**__ defines the Opentsdb URL - required
-- __**LoggingLevel**__ defines the logging level (possible values: debug, info, warn, error, fatal, panic) - default value : info
-- __**BulkSize**__ defines the size of the bulk pushed to Opentsdb - default value : 50
-- __**ThreadCount**__ defines how many goroutines will push data to Opentsdb
+- __**LoggingLevel**__ defines the logging level (possible values: debug, info, warn, error, fatal, panic) - default value: info
+- __**BulkSize**__ defines the size of the bulk pushed to Opentsdb - default value: 50
+- __**ThreadCount**__ defines how many goroutines will push data to Opentsdb - default value: 1
+- __**PushTimeout**__ defines the timeout when pushing data to Opentsdb - default value: 1 minute, format: [quantity][unit] (valid unit values: ms, s, m or h), example: 10s, 500ms, ...
 
 The **second part**, the __query description file__ defines the "what": what's my query and how do I map the results ?
 

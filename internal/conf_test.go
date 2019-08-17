@@ -69,6 +69,7 @@ func TestGetExporterConf(t *testing.T) {
 				LoggingLevel:  "info",
 				BulkSize:      50,
 				ThreadCount:   2,
+				PushTimeout:   "1s",
 			},
 		},
 	}
@@ -82,6 +83,7 @@ func TestGetExporterConf(t *testing.T) {
 				assert.Equal(t, tc.expExporterConf.LoggingLevel, c.LoggingLevel)
 				assert.Equal(t, tc.expExporterConf.BulkSize, c.BulkSize)
 				assert.Equal(t, tc.expExporterConf.ThreadCount, c.ThreadCount)
+				assert.Equal(t, tc.expExporterConf.PushTimeout, c.PushTimeout)
 			} else {
 				assert.NotNil(t, err)
 			}

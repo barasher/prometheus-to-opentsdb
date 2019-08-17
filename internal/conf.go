@@ -84,6 +84,7 @@ type ExporterConf struct {
 	OpentsdbURL   string
 	BulkSize      uint
 	ThreadCount   uint
+	PushTimeout   string
 	LoggingLevel  string
 }
 

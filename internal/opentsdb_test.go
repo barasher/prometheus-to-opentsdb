@@ -17,6 +17,15 @@ func TestNewOpentsdbDefaultValues(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, defaultBulkSize, o.bulkSize)
 	assert.Equal(t, defaultThreadCount, o.threadCount)
+	assert.Equal(t, defaultPushTimeout, o.pushTimeout)
+}
+
+func TestNewOpentsdbUnparsableTimeout(t *testing.T) {
+	c := ExporterConf{
+		PushTimeout: "blabla",
+	}
+	_, err := NewOpentsdb(c)
+	assert.NotNil(t, err)
 }
 
 func TestDoPush(t *testing.T) {
