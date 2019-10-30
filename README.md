@@ -103,6 +103,10 @@ Return codes:
 
 ### Get from docker hub
 
+Docker images are available [here](https://hub.docker.com/r/barasher/prometheus_to_opentsdb/tags).
+
+`docker pull barasher/prometheus_to_opentsdb:1.2`
+
 ### Build
 
 `docker build -t barasher/prometheus_to_opentsdb:latest .`
