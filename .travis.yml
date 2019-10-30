@@ -4,7 +4,7 @@ go:
   - 1.x
 
 before_install:
-  - env GO111MODULE=on go get -v
+  - env GO111MODULE=on go get -v ./...
   
 script:
   - go test -coverprofile=coverage.txt -covermode=atomic ./...
