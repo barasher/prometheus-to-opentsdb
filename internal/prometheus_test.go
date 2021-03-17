@@ -182,9 +182,9 @@ func TestQueryErrorOnQuerying(t *testing.T) {
 }
 
 func TestNormalize(t *testing.T) {
-	s := "1234567890)=azertyuiop^$qsdfghjklm*	<wxcvbn,;:!"
+	s := "1234567890)=azertyuiop^$qsdfghjklm*	<wxcvbn,;:!./-"
 	r := Prometheus{}.normalize(s)
-	assert.Equal(t, "1234567890__azertyuiop__qsdfghjklm___wxcvbn____", r)
+	assert.Equal(t, "1234567890__azertyuiop__qsdfghjklm___wxcvbn____./-", r)
 }
 
 func TestConvertTag(t *testing.T) {
