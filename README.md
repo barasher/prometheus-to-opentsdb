@@ -143,7 +143,8 @@ The idea is that :
 
 ## Metrics mapping
 
-Metrics, tag names and tag values are normalized to fit Opentsdb constraints. Any character that is not `[a-z]`, `[A-Z]`, `[0-9]` or `_` is replaced by `_`.
+Metrics, tag names and tag values are normalized to fit [Opentsdb constraints](http://opentsdb.net/docs/build/html/user_guide/writing/index.html#metrics-and-tags).
+Any character that is not `[a-z]`, `[A-Z]`, `[0-9]`, `.`, `-`, `/` or `_` is replaced by `_`.
 
 ## Changelog
 

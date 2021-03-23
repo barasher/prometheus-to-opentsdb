@@ -116,7 +116,8 @@ func (p Prometheus) convertTags(ss promCommon.Metric, c QueryConf) map[string]st
 func (p Prometheus) normalize(s string) string {
 	b := []byte(s)
 	for i, c := range b {
-		if !((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z')) {
+		if !((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') ||
+			c == '-' || c == '_' || c == '.' || c == '/') {
 			b[i] = '_'
 		}
 	}
