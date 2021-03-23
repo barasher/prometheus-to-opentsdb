@@ -157,3 +157,5 @@ Any character that is not `[a-z]`, `[A-Z]`, `[0-9]`, `.`, `-`, `/` or `_` is rep
   - split data pushed to Opentsdb
   - parallelize interaction with Opentsdb when pushing data
   - docker image integration
+- **[v1.3](https://github.com/barasher/prometheus-to-opentsdb/milestone/3?closed=1)** :
+  - [metrics and tags normalization now follow opentsdb's specifications](https://github.com/barasher/prometheus-to-opentsdb/pull/16), thanks to [Eugene Chung](https://github.com/EugeneChung)
