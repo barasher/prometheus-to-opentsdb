@@ -67,7 +67,9 @@ The **second part**, the __query description file__ defines the "what": what's m
   - __**RenameTags**__ defines the tag names that have to be renamed
 
 The **third part** defines all the parameters (command line) relative to a specific execution :
-- `-f` and `-t` (both required) defines the date range for the execution. The date format (UTC) is the following `YYYY-MM-DDThh:mm:ss.lllZ` where `YYYY` is the year, `MM` the month, `DD` the day, `hh` the hour, `mm` the minutes, `ss` the seconds and `lll` the milliseconds. Sample : `2019-07-31T17:03:00.000Z`.
+- `-f` and `-t` (both required) defines the date range for the execution. It supports RFC3339 date format.
+  - `YYYY-MM-DDThh:mm:ss.lllZ` where `YYYY` is the year, `MM` the month, `DD` the day, `hh` the hour, `mm` the minutes, `ss` the seconds, `lll` the milliseconds and `Z` UTC+0. Sample : `2019-07-31T17:03:00.000Z`.
+  - `YYYY-MM-DDThh:mm:ss.lll+09:00` or `YYYY-MM-DDThh:mm:ss.lll-04:00` where you can describe time-zone with `+xx:00` or `-yy:00`.
 - `-s` activates the simulation mode : data will be gathered from Prometheus, mapped as it should be for Opentsdb but it will not be sent but only printed. By default, simulation mode is disabled.
 
 But why such a configuration mechanism ? The objective is in fact :
