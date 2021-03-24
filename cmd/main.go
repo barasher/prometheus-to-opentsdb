@@ -27,8 +27,6 @@ const (
 	simuParamKey         string = "s"
 )
 
-const dateFormat string = "2006-01-02T15:04:05.000Z"
-
 const defaultLoggingLevel string = "info"
 
 var loggingLevels = map[string]logrus.Level{
@@ -101,11 +99,11 @@ func doMain(args []string) int {
 		return retConfFailure
 	}
 
-	if queryConf.Start, err = time.Parse(dateFormat, *fromParam); err != nil {
+	if queryConf.Start, err = time.Parse(time.RFC3339, *fromParam); err != nil {
 		logrus.Errorf("error while parsing start date (%v): %v", *fromParam, err)
 		return retConfFailure
 	}
-	if queryConf.End, err = time.Parse(dateFormat, *toParam); err != nil {
+	if queryConf.End, err = time.Parse(time.RFC3339, *toParam); err != nil {
 		logrus.Errorf("error while parsing end date (%v): %v", *toParam, err)
 		return retConfFailure
 	}
