@@ -107,7 +107,7 @@ Return codes:
 
 Docker images are available [here](https://hub.docker.com/r/barasher/prometheus_to_opentsdb/tags).
 
-`docker pull barasher/prometheus_to_opentsdb:1.3`
+`docker pull barasher/prometheus_to_opentsdb:1.4`
 
 ### Build
 
@@ -139,9 +139,6 @@ The idea is that :
 - you can provide to your clients a "base" Docker image that contains the exporter configuration.
 - your clients can build their own Docker image containing the query configuration if they want to (or they can just provide the configuration as volume at each execution)
 - your clients executes a Docker image (theirs or yours), specifying the date range for the query.
- 
-
-
 
 ## Metrics mapping
 
@@ -161,3 +158,5 @@ Any character that is not `[a-z]`, `[A-Z]`, `[0-9]`, `.`, `-`, `/` or `_` is rep
   - docker image integration
 - **[v1.3](https://github.com/barasher/prometheus-to-opentsdb/milestone/3?closed=1)** :
   - [metrics and tags normalization now follow opentsdb's specifications](https://github.com/barasher/prometheus-to-opentsdb/pull/16), thanks to [Eugene Chung](https://github.com/EugeneChung)
+- **[v1.4](https://github.com/barasher/prometheus-to-opentsdb/milestone/4)** :
+  - [add timezone support for -f and -t parameters (date range)](https://github.com/barasher/prometheus-to-opentsdb/pull/18), thanks to [Eugene Chung](https://github.com/EugeneChung)
